@@ -1,0 +1,8 @@
+{
+    "hostname": "random.mindtouch.es",
+    "authId": 1,
+    "clientID": "clientID",
+    "clientSecret": "clientSecret",
+    "scope": "profile",
+    "port": 8080
+}
