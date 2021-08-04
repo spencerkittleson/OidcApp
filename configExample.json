@@ -1,5 +1,6 @@
 {
     "hostname": "random.mindtouch.es",
+    "appHostname": "notLocalhost",
     "authId": 1,
     "clientID": "clientID",
     "clientSecret": "clientSecret",

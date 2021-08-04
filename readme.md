@@ -9,6 +9,7 @@ Make a copy of `configExample.json` to `config.json` then update with [perquisit
 ```json
 {
     "hostname": "// Hostname of site",
+    "appHostname": "// hostname of this app (localhost does seem to be an issue with Chrome)",
     "authId": 1, // service provider id provided by support
     "clientID": "// OAuth2 Client Id",
     "clientSecret": "// OAuth2 Client Secret",
