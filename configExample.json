@@ -1,9 +1,10 @@
 {
-    "hostname": "random.mindtouch.es",
     "appHostname": "notLocalhost",
     "authId": 1,
+    "browserTokenKey": "browserTokenKey",
     "clientID": "clientID",
     "clientSecret": "clientSecret",
-    "scope": "profile",
-    "port": 8080
+    "hostname": "random.mindtouch.es",
+    "port": 8080,
+    "scope": "profile"
 }
