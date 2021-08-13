@@ -20,16 +20,17 @@ app.get('/config.json', (req, res) => {
         JSON.stringify({
             authorizeUrl: config.authorizeUrl,
             api: config.api,
+            appHostname: config.appHostname,
+            hostname: config.hostname,
+            browserTokenKey: config.browserTokenKey
         })
     );
 });
-
 
 let jwtByCode = {};
 
 // After the user has been authorized, the callback with `redirectUri` is invoked with an authorization code.
 app.get(redirectPath, async (req, res) => {
-
     // Retrieve the authorization JWT from identity provider
     const jwt = await requestAccessToken(req.query.code, config);
 
@@ -54,9 +55,6 @@ app.get('/token.json', (req, res) => {
     res.end();
 });
 
-app.get('/@proxy', (req,res) => {
-  
-});
 
 app.listen(port);
 

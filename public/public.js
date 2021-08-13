@@ -1,3 +1,5 @@
+import  * as Martian from '/martian.js';
+
 function preLoginAuthLink(aLoginElement, authorizeUrl) {
     aLoginElement.href = authorizeUrl;
     aLoginElement.hidden = false;
@@ -39,11 +41,20 @@ async function main() {
         sessionStorage.setItem('jwt', JSON.stringify(tokenJson));
         document.location.href = '/';
     } else if (sessionStorage.getItem('jwt') != null) {
-        const apiUrl = apiJsonPathHelper(configJson.api, 'users/current');
+        //const apiUrl = apiJsonPathHelper(configJson.api, 'users/current');
 
         // Current user info request
-        const currentUser = await (await fetch(apiUrl.toString(), fetchOptionsAuth())).json();
-        welcomeMessage(document.getElementById('welcomeMessage'), document.getElementById('name'), currentUser.email);
+        //const currentUser = await (await fetch(apiUrl.toString(), fetchOptionsAuth())).json();
+        //welcomeMessage(document.getElementById('welcomeMessage'), document.getElementById('name'), currentUser.email);
+        const martianSettings = new Martian.default.Settings({
+            token: configJson.browserTokenKey,
+            origin: "http://" + configJson.appHostname,
+            host: "https://" +  configJson.hostname
+        });
+        console.log(martianSettings);
+        const homePage = new Martian.default.Page('home', martianSettings);
+        const homePageInfo = await homePage.getInfo();
+        console.log(homePageInfo);
     } else {
         preLoginAuthLink(document.getElementById('login'), configJson.authorizeUrl);
     }
