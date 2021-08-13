@@ -10,6 +10,32 @@ function welcomeMessage(welcomeMessageElement, nameElement, email) {
     nameElement.innerText = email;
 }
 
+function displaySiteTree(elm, pageInfo) {
+    const list = document.createElement('ul');
+    elm.appendChild(list);
+    list.appendChild(pageNode(pageInfo));
+}
+
+function addSubpages(pageInfo) {
+    const list = document.createElement('ul');
+        pageInfo.subpages.forEach(subpage => {
+            list.appendChild(pageNode(subpage));
+        })
+    return list;
+}
+
+function pageNode(pageInfo) {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.innerText = pageInfo.title;
+    a.href = pageInfo.uri;
+    li.appendChild(a);
+    if (pageInfo.subpages.length > 0) {
+        li.appendChild(addSubpages(pageInfo));
+    }
+    return li;
+}
+
 /**
  * Creates a URL for API access
  * @param {string} basePath
@@ -41,20 +67,14 @@ async function main() {
         sessionStorage.setItem('jwt', JSON.stringify(tokenJson));
         document.location.href = '/';
     } else if (sessionStorage.getItem('jwt') != null) {
-        //const apiUrl = apiJsonPathHelper(configJson.api, 'users/current');
-
-        // Current user info request
-        //const currentUser = await (await fetch(apiUrl.toString(), fetchOptionsAuth())).json();
-        //welcomeMessage(document.getElementById('welcomeMessage'), document.getElementById('name'), currentUser.email);
         const martianSettings = new Martian.default.Settings({
             token: configJson.browserTokenKey,
             origin: "http://" + configJson.appHostname,
             host: "https://" +  configJson.hostname
         });
-        console.log(martianSettings);
         const homePage = new Martian.default.Page('home', martianSettings);
-        const homePageInfo = await homePage.getInfo();
-        console.log(homePageInfo);
+        const homePageInfo = await homePage.getTree();
+        displaySiteTree(document.getElementById('pageInfo'), homePageInfo);
     } else {
         preLoginAuthLink(document.getElementById('login'), configJson.authorizeUrl);
     }
