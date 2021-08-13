@@ -6,7 +6,7 @@ let config = JSON.parse(fs.readFileSync(__dirname + '/config.json'));
 config.accessTokenUrl = `https://${config.hostname}/@app/auth/${config.authId}/token/access.json`;
 config.api = `https://${config.hostname}/@api/deki/`;
 const redirectPath = '/oauth2/redirect';
-config.redirectUri = `http://${appHostname}:${port}${redirectPath}`;
+config.redirectUri = `http://${config.appHostname}:${port}${redirectPath}`;
 config.authorizeUrl = `https://${config.hostname}/@app/auth/${config.authId}/token/authorize?client_id=${config.clientID}&scope=${config.scope}&response_type=code&redirect_uri=${config.redirectUri}`;
 
 // Web server instance
@@ -52,6 +52,10 @@ app.get('/token.json', (req, res) => {
         res.write(JSON.stringify({}));
     }
     res.end();
+});
+
+app.get('/@proxy', (req,res) => {
+  
 });
 
 app.listen(port);
