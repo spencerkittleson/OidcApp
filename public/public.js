@@ -1,4 +1,6 @@
-import  * as Martian from '/martian.js';
+import * as Martian from '/martian.js';
+
+let martianSettings;
 
 function preLoginAuthLink(aLoginElement, authorizeUrl) {
     aLoginElement.href = authorizeUrl;
@@ -14,18 +16,85 @@ function displaySiteTree(elm, pageInfo) {
     const list = document.createElement('ul');
     elm.appendChild(list);
     list.appendChild(pageNode(pageInfo));
+    var dragged;
+    /* events fired on the draggable target */
+    document.addEventListener('drag', function (event) {}, false);
+
+    document.addEventListener(
+        'dragstart',
+        function (event) {
+            dragged = event.target;
+        },
+        false
+    );
+
+    document.addEventListener(
+        'dragover',
+        function (event) {
+            // prevent default to allow drop
+            event.preventDefault();
+        },
+        false
+    );
+
+    document.addEventListener(
+        'dragenter',
+        function (event) {
+            // highlight potential drop target when the draggable element enters it
+            if (event.target.className == 'dropzone') {
+                event.target.style.background = 'purple';
+            }
+        },
+        false
+    );
+
+    document.addEventListener(
+        'dragleave',
+        function (event) {
+            // reset background of potential drop target when the draggable element leaves it
+            if (event.target.className == 'dropzone') {
+                event.target.style.background = 'inherit';
+            }
+        },
+        false
+    );
+
+    document.addEventListener(
+        'drop',
+        function (event) {
+            // prevent default action (open as link for some elements)
+            event.preventDefault();
+            console.log(event);
+            // move dragged elem to the selected drop target
+            if (event.target.className == 'dropzone') {
+                dragged.parentNode.removeChild(dragged);
+                event.target.appendChild(dragged);
+                event.target.style.background = 'inherit';
+                move(dragged.dataset.id, event.target.dataset.parentId);
+                event.target.appendChild(dragged);
+                event.target.style.background = 'inherit';
+            }
+        },
+        false
+    );
 }
 
 function addSubpages(pageInfo) {
     const list = document.createElement('ul');
-        pageInfo.subpages.forEach(subpage => {
-            list.appendChild(pageNode(subpage));
-        })
+    list.dataset.parentId = pageInfo.id;
+    list.classList.add('dropzone');
+    pageInfo.subpages.forEach((subpage) => {
+        list.appendChild(pageNode(subpage));
+    });
     return list;
 }
 
 function pageNode(pageInfo) {
     const li = document.createElement('li');
+    li.draggable = true;
+    li.dataset.name = pageInfo.title;
+    li.dataset.guid = pageInfo.guid;
+    li.dataset.id = pageInfo.id;
     const a = document.createElement('a');
     a.innerText = pageInfo.title;
     a.href = pageInfo.uri;
@@ -34,6 +103,13 @@ function pageNode(pageInfo) {
         li.appendChild(addSubpages(pageInfo));
     }
     return li;
+}
+
+async function move(pageid, parentid) {
+    console.log({ draggedGuid: pageid, targetId: parentid });
+    const pageApi = new Martian.default.Page(parseInt(pageid, 10), martianSettings);
+    const moveRequest = await pageApi.move({ parentid });
+    console.log(moveRequest);
 }
 
 /**
@@ -67,10 +143,10 @@ async function main() {
         sessionStorage.setItem('jwt', JSON.stringify(tokenJson));
         document.location.href = '/';
     } else if (sessionStorage.getItem('jwt') != null) {
-        const martianSettings = new Martian.default.Settings({
+        martianSettings = new Martian.default.Settings({
             token: configJson.browserTokenKey,
-            origin: "http://" + configJson.appHostname,
-            host: "https://" +  configJson.hostname
+            origin: 'http://' + configJson.appHostname,
+            host: 'https://' + configJson.hostname,
         });
         const homePage = new Martian.default.Page('home', martianSettings);
         const homePageInfo = await homePage.getTree();
