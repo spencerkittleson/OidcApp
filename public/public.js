@@ -1,9 +1,13 @@
-function preLoginAuthLink(aLoginElement, authorizeUrl) {
+function onLoadRender(aLoginElement, authorizeUrl) {
     aLoginElement.href = authorizeUrl;
     aLoginElement.hidden = false;
 }
 
-function welcomeMessage(welcomeMessageElement, nameElement, email) {
+function postLoginRender(logoutElement, welcomeMessageElement, nameElement, email) {
+    logoutElement.onclick(function(){
+        sessionStorage.clear();
+        window.location.href = '/';
+    });
     welcomeMessageElement.hidden = false;
     nameElement.innerText = email;
 }
@@ -36,16 +40,26 @@ async function main() {
     if (params.has('code')) {
         const tokenResponse = await fetch(`/token.json?code=${params.get('code')}`);
         const tokenJson = await tokenResponse.json();
-        sessionStorage.setItem('jwt', JSON.stringify(tokenJson));
-        document.location.href = '/';
+        const tokenJsonStr = JSON.stringify(tokenJson);
+        if(tokenJsonStr.length > 10){
+            sessionStorage.setItem('jwt', tokenJsonStr);
+            document.location.href = '/';
+        } else {
+            alert('empty jwt');
+        }
     } else if (sessionStorage.getItem('jwt') != null) {
         const apiUrl = apiJsonPathHelper(configJson.api, 'users/current');
 
         // Current user info request
         const currentUser = await (await fetch(apiUrl.toString(), fetchOptionsAuth())).json();
-        welcomeMessage(document.getElementById('welcomeMessage'), document.getElementById('name'), currentUser.email);
+        postLoginRender(
+            document.getElementById('logout'),
+            document.getElementById('welcomeMessage'), 
+            document.getElementById('name'), 
+            currentUser.email);
+        
     } else {
-        preLoginAuthLink(document.getElementById('login'), configJson.authorizeUrl);
+        onLoadRender(document.getElementById('login'), configJson.authorizeUrl);
     }
 }
 

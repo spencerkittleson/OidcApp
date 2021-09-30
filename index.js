@@ -2,6 +2,10 @@ const express = require('express');
 const fetch = require('node-fetch');
 const fs = require('fs');
 const port = 8080;
+
+// Local testing
+//process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+
 let config = JSON.parse(fs.readFileSync(__dirname + '/config.json'));
 config.accessTokenUrl = `https://${config.hostname}/@app/auth/${config.authId}/token/access.json`;
 config.api = `https://${config.hostname}/@api/deki/`;
@@ -14,7 +18,7 @@ const app = express();
 app.use(express.static(__dirname + '/public'));
 
 // Endpoint with current configuration details
-app.get('/config.json', (req, res) => {
+app.get('/config.json', (_req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.end(
         JSON.stringify({
@@ -24,12 +28,10 @@ app.get('/config.json', (req, res) => {
     );
 });
 
-
 let jwtByCode = {};
 
 // After the user has been authorized, the callback with `redirectUri` is invoked with an authorization code.
 app.get(redirectPath, async (req, res) => {
-
     // Retrieve the authorization JWT from identity provider
     const jwt = await requestAccessToken(req.query.code, config);
 
@@ -54,18 +56,6 @@ app.get('/token.json', (req, res) => {
     res.end();
 });
 
-app.get('/@proxy', (req,res) => {
-  
-});
-
-app.listen(port);
-
-function redirectHome(res) {
-    res.statusCode = 302;
-    res.setHeader('Location', '/');
-    res.end();
-}
-
 async function requestAccessToken(code, config) {
     const data = {
         code: code,
@@ -85,9 +75,15 @@ async function requestAccessToken(code, config) {
                 Authorization: authorizationHeader,
             },
         });
+        if (!response.ok) {
+            console.log(response);
+            console.log(await response.text());
+        }
         return await response.json();
     } catch (err) {
         console.warn('Unable to get an access token: ' + err); // eslint-disable-line no-console
         return JSON.stringify({});
     }
 }
+
+app.listen(port);
