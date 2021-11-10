@@ -4,10 +4,10 @@ function onLoadRender(aLoginElement, authorizeUrl) {
 }
 
 function postLoginRender(logoutElement, welcomeMessageElement, nameElement, email) {
-    logoutElement.onclick(function(){
+    logoutElement.onclick = function () {
         sessionStorage.clear();
         window.location.href = '/';
-    });
+    };
     welcomeMessageElement.hidden = false;
     nameElement.innerText = email;
 }
@@ -41,7 +41,7 @@ async function main() {
         const tokenResponse = await fetch(`/token.json?code=${params.get('code')}`);
         const tokenJson = await tokenResponse.json();
         const tokenJsonStr = JSON.stringify(tokenJson);
-        if(tokenJsonStr.length > 10){
+        if (tokenJsonStr.length > 10) {
             sessionStorage.setItem('jwt', tokenJsonStr);
             document.location.href = '/';
         } else {
@@ -54,10 +54,10 @@ async function main() {
         const currentUser = await (await fetch(apiUrl.toString(), fetchOptionsAuth())).json();
         postLoginRender(
             document.getElementById('logout'),
-            document.getElementById('welcomeMessage'), 
-            document.getElementById('name'), 
-            currentUser.email);
-        
+            document.getElementById('welcomeMessage'),
+            document.getElementById('name'),
+            currentUser.email
+        );
     } else {
         onLoadRender(document.getElementById('login'), configJson.authorizeUrl);
     }
