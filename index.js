@@ -21,8 +21,7 @@ app.get('/config.json', (req, res) => {
             authorizeUrl: config.authorizeUrl,
             api: config.api,
             appHostname: config.appHostname,
-            hostname: config.hostname,
-            browserTokenKey: config.browserTokenKey
+            hostname: config.hostname
         })
     );
 });
@@ -55,14 +54,7 @@ app.get('/token.json', (req, res) => {
     res.end();
 });
 
-
 app.listen(port);
-
-function redirectHome(res) {
-    res.statusCode = 302;
-    res.setHeader('Location', '/');
-    res.end();
-}
 
 async function requestAccessToken(code, config) {
     const data = {

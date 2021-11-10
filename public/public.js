@@ -6,12 +6,6 @@ function preLoginAuthLink(aLoginElement, authorizeUrl) {
     aLoginElement.href = authorizeUrl;
     aLoginElement.hidden = false;
 }
-
-function welcomeMessage(welcomeMessageElement, nameElement, email) {
-    welcomeMessageElement.hidden = false;
-    nameElement.innerText = email;
-}
-
 function displaySiteTree(elm, pageInfo) {
     const list = document.createElement('ul');
     elm.appendChild(list);
@@ -112,27 +106,6 @@ async function move(pageid, parentid) {
     console.log(moveRequest);
 }
 
-/**
- * Creates a URL for API access
- * @param {string} basePath
- * @param {string} path
- * @returns {URL}
- */
-
-function apiJsonPathHelper(basePath, path) {
-    const apiUrl = new URL(path, basePath);
-    apiUrl.searchParams.append('dream.out.format', 'json');
-    return apiUrl;
-}
-
-function fetchOptionsAuth(options = { headers: {} }) {
-    const jwtSession = JSON.parse(sessionStorage.getItem('jwt'));
-    if (options && options.headers) {
-        options.headers.Authorization = `${jwtSession.token_type} ${jwtSession.access_token}`;
-    }
-    return options;
-}
-
 async function main() {
     const configResponse = await fetch('/config.json');
     const configJson = await configResponse.json();
@@ -144,13 +117,16 @@ async function main() {
         document.location.href = '/';
     } else if (sessionStorage.getItem('jwt') != null) {
         martianSettings = new Martian.default.Settings({
-            token: configJson.browserTokenKey,
             origin: 'http://' + configJson.appHostname,
             host: 'https://' + configJson.hostname,
         });
         const homePage = new Martian.default.Page('home', martianSettings);
         const homePageInfo = await homePage.getTree();
         displaySiteTree(document.getElementById('pageInfo'), homePageInfo);
+        const user = new Martian.default.User('current', martianSettings);
+        const currentUser = await user.getInfo();
+        document.getElementById('welcomeMessage').removeAttribute('hidden');
+        document.getElementById('name').innerText = currentUser.email;
     } else {
         preLoginAuthLink(document.getElementById('login'), configJson.authorizeUrl);
     }
